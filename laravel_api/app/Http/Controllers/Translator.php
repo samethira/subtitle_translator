@@ -15,7 +15,13 @@ class Translator extends Controller
     public function translate(Request $request)
     {
         $file = $request->file('file');
-
+        $language = $request->input('language');
+        if (!$file) {
+            return response()->json(['error' => 'No file provided'], 400);
+        }
+        if (!$language) {
+            return response()->json(['error' => 'No language provided'], 400);
+        }
         $validation = $this->validate_file($file);
         if ($validation instanceof JsonResponse) {
             return $validation;
@@ -40,7 +46,7 @@ class Translator extends Controller
         Storage::put('translation_jobs/'.$jobId.'.json', json_encode($convert));
         Storage::put('translation_jobs/'.$jobId.'_status.json', json_encode($job));
         /*dispatch job*/
-        TranslateSubtitlesJob::dispatch($jobId, $file->getClientOriginalName(), $code);
+        TranslateSubtitlesJob::dispatch($jobId, $file->getClientOriginalName(), $code, $language);
         /*job created*/
         return response()->json(['job_id' => $job], 200);
     }
@@ -116,10 +122,8 @@ class Translator extends Controller
             return response()->json(['error' => 'Result file not found'], 404);
         }
 
-        // Return the file as download response
-        return response()->download($result_path, $downloadFilename, [
-            'Content-Type' => 'application/x-subrip',
-        ]);
+        /*returning download link*/
+        return response()->download($result_path, $downloadFilename);
     }
 
 }
