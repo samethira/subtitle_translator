@@ -18,11 +18,13 @@ class TranslateSubtitlesJob implements ShouldQueue
     protected $file_name;
 
     protected $string;
-    public function __construct($jobId, $file_name, $string)
+    protected $language;
+    public function __construct($jobId, $file_name, $string, $language)
     {
         $this->job_id = $jobId;
         $this->file_name = $file_name;
         $this->string = $string;
+        $this->language = $language;
     }
 
     /**
@@ -31,7 +33,9 @@ class TranslateSubtitlesJob implements ShouldQueue
     public function handle()
     {
         /*prompt to generate the subtitles. modify if wanted*/
-        $prompt = "Convert the following SRT block to Dutch. Keep the exact same format, same line splits within text blocks, same number of lines per entry, and same timing. Only generate the translated SRT block as output, no introductory text, no explanations, and no ```srt or ``` markers.";
+        $prompt = "Convert the following SRT block to ".$this->language.".
+        Keep the exact same format, same line splits within text blocks, same number of lines per entry, and same timing.
+        Only generate the translated SRT block as output, no introductory text, no explanations, and no ```srt or ``` markers.";
 
         /*json file*/
         $file_path = storage_path('app/private/translation_jobs/'.$this->job_id.'.json');
